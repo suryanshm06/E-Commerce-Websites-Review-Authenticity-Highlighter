@@ -30,62 +30,52 @@ No training run is required. Do not run a separate baseline trainer; the bundled
 
 ## First-time setup on Windows
 
-Extract the complete project folder somewhere convenient. Open Command Prompt and change directory to the folder containing `manifest.json` and `package.json`. For example:
+### Requirements
+
+- Windows 10 or newer.
+- Python 3.10 or newer. If `python` is not recognized, install Python from python.org, select **Add python.exe to PATH**, and reopen Command Prompt.
+- Node.js 18 or newer (including npm).
+- Chrome or a Chromium-based browser such as Brave.
+
+### 1. Run the setup script
+
+Extract the complete project folder. Open the folder containing `setup.bat`, `run.bat`, `manifest.json`, and `package.json`. Run `setup.bat` (double-click it, or run it from Command Prompt):
 
 ```cmd
-cd /d "C:\Users\admin\Downloads\project norman\review-authenticity-extension new"
+setup.bat
 ```
 
-### 1. Create a Python environment and install dependencies
+The script installs the Python dependencies required by the model. The saved TF-IDF vectorizer was serialized with scikit-learn 1.9.0; the requirements pin that version for compatibility. No model training or virtual environment setup is needed.
 
-Run these once in that project folder:
+### 2. Install Node.js dependencies
 
-```cmd
-python --version
-python -m venv .venv
-.venv\Scripts\activate
-python -m pip install --upgrade pip
-python -m pip install --upgrade -r model\requirements.txt
-```
-
-The saved TF-IDF vectorizer was serialized with scikit-learn 1.9.0; the requirements pin that version for compatibility. If `python` is not recognized, install Python from python.org, select **Add python.exe to PATH**, then reopen Command Prompt.
-
-### 2. Install Node dependencies
-
-In the same project folder, run:
+The setup script does not install Node.js packages. In Command Prompt, from the project folder, run this once:
 
 ```cmd
 npm install
 ```
 
-This is a one-time setup for this folder.
+### 3. Start the services
 
-### 3. Start the Python model service
-
-In the first Command Prompt, with `(.venv)` active, run:
+Run `run.bat` from the project folder:
 
 ```cmd
-python model\model_service.py
+run.bat
 ```
 
-Leave the window open. Check `http://127.0.0.1:8000/health`; the JSON should report `"modelLoaded": true`. A `404` at the root `http://127.0.0.1:8000/` is expected; use `/health`.
+It opens separate Command Prompt windows for the Python model service and Node bridge. Keep both windows open while using the extension. You can check that they are running at `http://127.0.0.1:8000/health` (should report `"modelLoaded": true`) and `http://localhost:3000/health` (should report `"ok": true`).
 
-### 4. Start the Node bridge
+### 4. Add the extension to Chrome (first time)
 
-Open a second Command Prompt in the project folder and run:
+1. In Chrome, enter `chrome://extensions` in the address bar and press Enter.
+2. Turn on **Developer mode** using the switch in the top-right corner.
+3. Click **Load unpacked**.
+4. In the folder picker, select the extracted project folder that contains `manifest.json`. Do not select the ZIP file or the `model` subfolder.
+5. Confirm the extension appears on the Extensions page and is enabled.
 
-```cmd
-npm start
-```
+For Brave, use `brave://extensions` and follow the same steps.
 
-Leave this window open too. Check `http://localhost:3000/health`; it should report `"ok": true`.
-
-### 5. Load the extension
-
-1. Open `chrome://extensions` in Chrome or `brave://extensions` in Brave.
-2. Enable **Developer mode**.
-3. Click **Load unpacked** and select the project folder containing `manifest.json` (not the ZIP and not the `model` subfolder).
-4. Make sure the extension is enabled.
+The extension only needs to be loaded once. On later uses, start the services by running `run.bat`; if you move or remove the project folder, load the extension again from its new location.
 
 ## Use the extension
 
@@ -117,4 +107,4 @@ The adjusted rating only covers reviews that are currently loaded on the page, h
 
 ## Stop the services
 
-When finished, press **Ctrl+C** in each service Command Prompt. Next time, activate `.venv` and start the Python service again, then run `npm start` in a second window. No retraining is needed.
+When finished, press **Ctrl+C** in each service Command Prompt. Next time, run `run.bat` again. The Python and Node dependencies only need to be installed once unless you reinstall or move the project. No retraining is needed.
